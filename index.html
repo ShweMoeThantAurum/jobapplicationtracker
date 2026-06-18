@@ -164,46 +164,36 @@ function setSyncStatus(state, label) { document.getElementById('syncDot').classN
 
 let apps = [], nextId = 1, pendingEntry = null;
 
-const SEED = [
-  {id:1,title:'Research Associate - Digital Skills and STEM Education',company:'National College of Ireland',date:'2026-03-08',status:'Rejected',notes:''},
-  {id:2,title:'Library Assistant',company:'Dublin College University',date:'2026-03-10',status:'Rejected',notes:''},
-  {id:3,title:'Junior Consultant',company:'Archer',date:'2026-03-10',status:'Rejected',notes:''},
-  {id:4,title:'Junior Consultant',company:'Access Healthcare',date:'2026-03-10',status:'Rejected',notes:''},
-  {id:5,title:'Entry Level - Technology (Cloud Engineering)',company:'Carne Group',date:'2026-03-10',status:'Rejected',notes:''},
-  {id:6,title:'IT Helpdesk Support Analyst - Level 1',company:'Mason Hayes & Curran',date:'2026-03-10',status:'Rejected',notes:''},
-  {id:7,title:'Ireland Technology Discover Graduate Programme 2026',company:'Vodafone',date:'2026-03-18',status:'Rejected',notes:''},
-  {id:8,title:'Early Career Analyst IT',company:'AIG',date:'2026-03-18',status:'Rejected',notes:'Need to check the website regularly'},
-  {id:9,title:'Graduate - Operations Technology Analyst',company:'Susquehanna International Group',date:'2026-03-18',status:'Rejected',notes:''},
-  {id:10,title:'Data Center Career Returners Program',company:'AWS',date:'2026-03-18',status:'Rejected',notes:'Need to check the website regularly'},
-  {id:11,title:'Graduate Software Engineer',company:'',date:'2026-03-18',status:'Rejected',notes:''},
-  {id:12,title:'EIR Web Developer / Programmer (EBT7922)',company:'EIR',date:'2026-03-21',status:'Rejected',notes:''},
-  {id:13,title:'Graduate Program - Digital Strategy',company:'Hewlett Packard Enterprise',date:'2026-03-21',status:'Rejected',notes:''},
-  {id:14,title:'Software Engineer Graduate',company:'Arista',date:'2026-03-21',status:'Rejected',notes:''},
-  {id:15,title:'Forward Deployed Engineer \u2013 New Graduate',company:'Whippy',date:'2026-03-21',status:'Rejected',notes:''},
-  {id:16,title:'Genesys Cloud Engineer',company:'Ardowen',date:'2026-03-31',status:'Rejected',notes:''},
-  {id:17,title:'Site Reliability Engineer',company:'Susquehanna International Group',date:'2026-03-31',status:'Rejected',notes:''},
-  {id:18,title:'Cloud Operations Engineer',company:'MongoDB',date:'2026-03-31',status:'Rejected',notes:''},
-  {id:19,title:'Entry Level - Site Reliability Engineer',company:'Yelp',date:'2026-04-04',status:'Rejected',notes:''},
-  {id:20,title:'Graduate Software Engineer, Open Source and Linux, Canonical Ubuntu',company:'Canonical',date:'2026-04-04',status:'Rejected',notes:''},
-  {id:21,title:'UCD Library Assistant',company:'University College Dublin',date:'2026-04-05',status:'Rejected',notes:''},
-  {id:22,title:'UCD Research Assistant',company:'University College Dublin',date:'2026-04-06',status:'Rejected',notes:''},
-];
+// Normalise any date string or Date object to DD/MM/YYYY
+function fmtDate(raw) {
+  if (!raw) return '';
+  // Already DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) return raw;
+  // ISO YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [y,m,d] = raw.split('-');
+    return d+'/'+m+'/'+y;
+  }
+  // Full Date string from Sheets e.g. "Mon Aug 03 2026 00:00:00 GMT+0100 (...)"
+  const d = new Date(raw);
+  if (!isNaN(d)) {
+    return String(d.getDate()).padStart(2,'0') + '/' +
+           String(d.getMonth()+1).padStart(2,'0') + '/' +
+           d.getFullYear();
+  }
+  return raw;
+}
 
 async function loadFromSheets() {
-  if (!SCRIPT_URL) { apps = JSON.parse(JSON.stringify(SEED)); nextId = 23; renderAll(); return; }
+  if (!SCRIPT_URL) { apps = []; nextId = 1; renderAll(); return; }
   setSyncStatus('syncing', 'Loading...');
   try {
     const res = await fetch(SCRIPT_URL + '?action=getAll');
     const data = await res.json();
-    if (data.rows && data.rows.length > 0) {
-      apps = data.rows.map((r, i) => ({ id: i+1, title: r[0]||'', company: r[1]||'', date: r[2]||'', status: r[3]||'Applied', notes: r[4]||'' }));
-      nextId = apps.length + 1;
-    } else {
-      apps = JSON.parse(JSON.stringify(SEED)); nextId = 23;
-      for (const a of SEED) await sheetPost('append', {title:a.title,company:a.company,date:a.date,status:a.status,notes:a.notes});
-    }
+    apps = (data.rows||[]).map((r, i) => ({ id: i+1, title: r[0]||'', company: r[1]||'', date: fmtDate(r[2]), status: r[3]||'Applied', notes: r[4]||'' }));
+    nextId = apps.length + 1;
     setSyncStatus('synced', 'Synced');
-  } catch(e) { setSyncStatus('error', 'Connection error'); showToast('Could not connect. Showing local data.'); apps = JSON.parse(JSON.stringify(SEED)); nextId = 23; }
+  } catch(e) { setSyncStatus('error', 'Connection error'); showToast('Could not connect to Google Sheets.'); apps = []; nextId = 1; }
   renderAll();
 }
 
@@ -272,7 +262,7 @@ async function extractJob() {
 }
 
 function showPreview(e) {
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date(); const today = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
   document.getElementById('previewArea').innerHTML=`<div class="preview"><div class="preview-grid">
     <span class="preview-label">Job title</span><span class="preview-val">${esc(e.title)}</span>
     <span class="preview-label">Company</span><span class="preview-val">${esc(e.company)||'<span style="color:#AAA">Not found</span>'}</span>
@@ -286,7 +276,7 @@ function showPreview(e) {
 
 async function confirmAdd() {
   if(!pendingEntry) return;
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date(); const today = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
   const entry = {id:nextId++,...pendingEntry,date:today,status:'Applied'};
   apps.unshift(entry); renderAll(); clearInput(); showToast('Added — '+entry.title);
   setSyncStatus('syncing','Saving...');
@@ -306,7 +296,7 @@ function exportCSV() {
 let toastTimer;
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800); }
 
-if (SCRIPT_URL) { setSyncStatus('syncing','Connecting...'); loadFromSheets(); } else { apps=JSON.parse(JSON.stringify(SEED)); nextId=23; setSyncStatus('','Not configured'); renderAll(); }
+if (SCRIPT_URL) { setSyncStatus('syncing','Connecting...'); loadFromSheets(); } else { apps=[]; nextId=1; setSyncStatus('','Not configured'); renderAll(); }
 </script>
 </body>
 </html>
