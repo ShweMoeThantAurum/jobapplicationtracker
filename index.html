@@ -3,526 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Job Application Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Job Tracker — Aurum</title>
 <style>
-/* ── Reset & base ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:        #0f1117;
-  --surface:   #181c26;
-  --surface2:  #1e2333;
-  --border:    #2a3048;
-  --border2:   #3a4560;
-  --text:      #e8eaf2;
-  --muted:     #7a82a0;
-  --accent:    #4f7cff;
-  --accent-dim:#1e2d5c;
-  --green:     #22c55e;
-  --green-dim: #0f2d1c;
-  --amber:     #f59e0b;
-  --amber-dim: #2d1f06;
-  --red:       #ef4444;
-  --red-dim:   #2d0f0f;
-  --teal:      #2dd4bf;
-  --teal-dim:  #0a2523;
-  --radius:    8px;
-  --radius-lg: 12px;
-  --mono:      'JetBrains Mono', monospace;
-  --sans:      'Inter', sans-serif;
-}
-
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* ── Layout ── */
-.shell {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-}
-
-/* ── Config banner ── */
-.config-banner {
-  background: var(--amber-dim);
-  border: 1px solid var(--amber);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 1.5rem;
-  font-size: 13px;
-  color: var(--amber);
-}
-.config-banner input {
-  flex: 1;
-  background: rgba(0,0,0,0.3);
-  border: 1px solid var(--amber);
-  border-radius: 6px;
-  padding: 5px 10px;
-  color: var(--amber);
-  font-family: var(--mono);
-  font-size: 12px;
-}
-.config-banner input::placeholder { color: rgba(245,158,11,0.5); }
-.config-banner input:focus { outline: none; border-color: #fbbf24; }
-.config-banner button {
-  background: var(--amber);
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 14px;
-  font-weight: 600;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* ── Header ── */
-.header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.header-left h1 {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  color: var(--text);
-}
-.header-left p {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 2px;
-  font-family: var(--mono);
-}
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  border-radius: var(--radius);
-  padding: 7px 14px;
-  font-size: 13px;
-  font-family: var(--sans);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.15s, color 0.15s;
-}
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ── Stats ── */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 2rem;
-}
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.25rem;
-}
-.stat-label {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
-.stat-num {
-  font-size: 28px;
-  font-weight: 600;
-  font-family: var(--mono);
-  color: var(--text);
-}
-.stat-num.c-blue  { color: var(--accent); }
-.stat-num.c-green { color: var(--green); }
-.stat-num.c-red   { color: var(--red); }
-
-/* ── AI Add panel ── */
-.add-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  margin-bottom: 1.75rem;
-}
-.panel-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  margin-bottom: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-family: var(--mono);
-}
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-textarea {
-  width: 100%;
-  min-height: 100px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 13px;
-  padding: 10px 12px;
-  resize: vertical;
-  line-height: 1.6;
-  transition: border-color 0.15s;
-}
-textarea:focus { outline: none; border-color: var(--accent); }
-textarea::placeholder { color: var(--muted); }
-
-.btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: var(--sans);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: opacity 0.15s;
-}
-.btn-primary:hover { opacity: 0.88; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  border-radius: var(--radius);
-  padding: 8px 14px;
-  font-size: 13px;
-  font-family: var(--sans);
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.btn-secondary:hover { border-color: var(--border2); color: var(--text); }
-
-/* ── Status message ── */
-.status-msg {
-  font-size: 12px;
-  font-family: var(--mono);
-  padding: 6px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-}
-.spinner {
-  width: 12px; height: 12px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  flex-shrink: 0;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Preview card ── */
-.preview-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.125rem;
-  margin-top: 12px;
-}
-.preview-card .prow {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 13px;
-  align-items: start;
-}
-.preview-card .prow:last-child { margin-bottom: 0; }
-.prow .plabel {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  padding-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.prow .pval {
-  color: var(--text);
-  font-weight: 500;
-}
-.prow .pval input,
-.prow .pval textarea,
-.prow .pval select {
-  width: 100%;
-  min-height: unset;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 13px;
-  padding: 5px 10px;
-  resize: none;
-}
-.prow .pval input:focus,
-.prow .pval textarea:focus,
-.prow .pval select:focus { outline: none; border-color: var(--accent); }
-.prow .pval select option { background: var(--surface2); }
-
-/* ── Filter row ── */
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-.filter-row label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
-.filter-row select {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 13px;
-  font-family: var(--sans);
-  padding: 5px 10px;
-  cursor: pointer;
-}
-.filter-row select:focus { outline: none; border-color: var(--accent); }
-
-/* ── Table ── */
-.table-wrap { overflow-x: auto; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-thead th {
-  font-family: var(--mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--muted);
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--surface2); }
-td {
-  padding: 10px 12px;
-  color: var(--text);
-  vertical-align: middle;
-}
-td.num { color: var(--muted); font-family: var(--mono); font-size: 12px; }
-td.title { font-weight: 500; }
-td.company { color: var(--muted); }
-td.date { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
-td.followup { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-td.notes { color: var(--muted); font-size: 12px; max-width: 180px; }
-
-/* ── Status badge ── */
-.badge {
-  display: inline-block;
-  font-size: 11px;
-  font-family: var(--mono);
-  font-weight: 500;
-  padding: 3px 9px;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-.badge-Applied   { background: var(--accent-dim);  color: #7da4ff; }
-.badge-Interview { background: var(--green-dim);   color: #4ade80; }
-.badge-Offer     { background: var(--teal-dim);    color: var(--teal); }
-.badge-Rejected  { background: var(--red-dim);     color: #f87171; }
-.badge-Pending   { background: var(--surface2);    color: var(--muted); }
-
-/* inline status select */
-.status-select {
-  background: transparent;
-  border: none;
-  font-size: 11px;
-  font-family: var(--mono);
-  font-weight: 500;
-  padding: 3px 6px;
-  border-radius: 100px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-}
-.status-select:focus { outline: 1px solid var(--accent); }
-.status-Applied   { background: var(--accent-dim); color: #7da4ff; }
-.status-Interview { background: var(--green-dim);  color: #4ade80; }
-.status-Offer     { background: var(--teal-dim);   color: var(--teal); }
-.status-Rejected  { background: var(--red-dim);    color: #f87171; }
-.status-Pending   { background: var(--surface2);   color: var(--muted); }
-
-/* action btns */
-.action-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 14px;
-  line-height: 1;
-  transition: color 0.1s, background 0.1s;
-}
-.action-btn:hover { background: var(--surface2); color: var(--text); }
-.action-btn.del:hover { color: var(--red); }
-
-/* empty state */
-.empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-/* toast */
-#toast {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  font-size: 13px;
-  color: var(--text);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.2s, transform 0.2s;
-  pointer-events: none;
-  z-index: 999;
-  max-width: 320px;
-}
-#toast.show { opacity: 1; transform: translateY(0); }
-#toast.success { border-color: var(--green); color: var(--green); }
-#toast.error   { border-color: var(--red);   color: var(--red);   }
-
-@media (max-width: 640px) {
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .header { flex-direction: column; align-items: flex-start; }
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F7F6F3; color: #1A1A1A; min-height: 100vh; padding-bottom: 4rem; }
+  h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+  h2 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+  .page { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+  header { background: #1A1A1A; color: #F7F6F3; padding: 0 1.5rem; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 1rem; }
+  .logo { font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #C8F05E; flex-shrink: 0; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .sync-status { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #888; flex-shrink: 0; transition: background 0.3s; }
+  .sync-dot.synced { background: #C8F05E; }
+  .sync-dot.syncing { background: #F0C85E; animation: pulse 1s ease-in-out infinite; }
+  .sync-dot.error { background: #F05E5E; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-sm { font-size: 12px; font-family: inherit; font-weight: 500; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(247,246,243,0.2); background: transparent; color: #F7F6F3; cursor: pointer; transition: background 0.15s; }
+  .btn-sm:hover { background: rgba(247,246,243,0.1); }
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #E5E4E0; border-bottom: 1px solid #E5E4E0; }
+  .stat { background: #fff; padding: 1.25rem 1.5rem; text-align: center; }
+  .stat-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+  .v-applied{color:#2563EB} .v-interview{color:#059669} .v-offer{color:#7C3AED} .v-rejected{color:#DC2626}
+  .card { background: #fff; border: 1px solid #E5E4E0; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 1rem; }
+  .add-section textarea { width: 100%; min-height: 100px; font-family: inherit; font-size: 14px; line-height: 1.6; padding: 12px; border: 1px solid #E5E4E0; border-radius: 8px; background: #F7F6F3; color: #1A1A1A; resize: vertical; transition: border-color 0.15s; }
+  .add-section textarea:focus { outline: none; border-color: #1A1A1A; background: #fff; }
+  .add-section textarea::placeholder { color: #AAA; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+  .btn { font-family: inherit; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 7px; cursor: pointer; border: 1px solid #E5E4E0; background: #fff; color: #1A1A1A; transition: background 0.15s, border-color 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: #F7F6F3; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
+  .btn-primary:hover { background: #333; border-color: #333; }
+  .preview { background: #F7F6F3; border: 1px solid #E5E4E0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 12px; font-size: 13px; }
+  .preview-grid { display: grid; grid-template-columns: 100px 1fr; gap: 6px 12px; align-items: start; }
+  .preview-label { color: #888; font-size: 12px; padding-top: 1px; }
+  .preview-val { font-weight: 500; color: #1A1A1A; }
+  .preview-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .loading { display: none; align-items: center; gap: 10px; font-size: 13px; color: #888; margin-top: 10px; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #E5E4E0; border-top-color: #1A1A1A; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  .table-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .table-controls label { font-size: 13px; color: #888; }
+  .table-controls select, .table-controls input[type="search"] { font-family: inherit; font-size: 13px; padding: 6px 10px; border-radius: 7px; border: 1px solid #E5E4E0; background: #fff; color: #1A1A1A; }
+  .table-controls select:focus, .table-controls input:focus { outline: none; border-color: #1A1A1A; }
+  .table-controls input[type="search"] { min-width: 180px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; border-bottom: 1px solid #E5E4E0; white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid #F0EFEb; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFAF8; }
+  .job-title { font-weight: 500; color: #1A1A1A; max-width: 240px; }
+  .company { color: #555; }
+  .date { color: #888; white-space: nowrap; }
+  .notes-cell { color: #888; font-size: 12px; max-width: 180px; }
+  .status-select { font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 20px; padding: 3px 22px 3px 10px; border: 1px solid transparent; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
+  .status-applied   { background-color: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; }
+  .status-interview { background-color: #ECFDF5; color: #065F46; border-color: #A7F3D0; }
+  .status-offer     { background-color: #F5F3FF; color: #5B21B6; border-color: #DDD6FE; }
+  .status-rejected  { background-color: #FEF2F2; color: #991B1B; border-color: #FECACA; }
+  .status-pending   { background-color: #F9FAFB; color: #6B7280; border-color: #E5E7EB; }
+  .btn-del { font-family: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; border: none; background: transparent; color: #CCC; cursor: pointer; transition: color 0.15s, background 0.15s; }
+  .btn-del:hover { color: #DC2626; background: #FEF2F2; }
+  .empty { text-align: center; padding: 3rem 1rem; color: #AAA; font-size: 14px; }
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1A1A1A; color: #fff; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 8px; transition: transform 0.3s ease; z-index: 200; white-space: nowrap; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 1.75rem; width: 100%; max-width: 480px; margin: 1rem; }
+  .modal h2 { margin-bottom: 0.5rem; }
+  .modal p { font-size: 13px; color: #666; margin-bottom: 1.25rem; line-height: 1.6; }
+  .modal label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+  .modal input[type="text"] { width: 100%; font-family: inherit; font-size: 13px; padding: 9px 12px; border: 1px solid #E5E4E0; border-radius: 7px; background: #F7F6F3; color: #1A1A1A; margin-bottom: 1rem; }
+  .modal input:focus { outline: none; border-color: #1A1A1A; background: #fff; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; }
+  @media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } .stat-value { font-size: 1.5rem; } }
 </style>
 </head>
 <body>
 
-<div class="shell">
-
-  <!-- Config banner (hidden once URL is saved) -->
-  <div class="config-banner" id="configBanner">
-    <span>⚙</span>
-    <span style="white-space:nowrap;">Apps Script URL:</span>
-    <input type="text" id="scriptUrlInput" placeholder="Paste your deployed Apps Script web app URL here…">
-    <button onclick="saveScriptUrl()">Save</button>
-  </div>
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <h1>Job application tracker</h1>
-      <p id="lastUpdated">loading…</p>
+<header>
+  <div class="header-inner">
+    <div class="logo"><div class="logo-dot"></div>Job tracker</div>
+    <div class="header-right">
+      <div class="sync-status"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Not configured</span></div>
+      <button class="btn-sm" onclick="openConfig()">⚙ Settings</button>
+      <button class="btn-sm" onclick="exportCSV()">↓ CSV</button>
     </div>
-    <button class="btn-ghost" onclick="exportCSV()">↓ Export CSV</button>
   </div>
+</header>
 
-  <!-- Stats -->
-  <div class="stats" id="stats">
-    <div class="stat"><div class="stat-label">Total</div><div class="stat-num" id="s-total">—</div></div>
-    <div class="stat"><div class="stat-label">Applied</div><div class="stat-num c-blue" id="s-applied">—</div></div>
-    <div class="stat"><div class="stat-label">Interviews</div><div class="stat-num c-green" id="s-interview">—</div></div>
-    <div class="stat"><div class="stat-label">Rejected</div><div class="stat-num c-red" id="s-rejected">—</div></div>
-  </div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value" id="s-total">0</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-value v-applied" id="s-applied">0</div><div class="stat-label">Applied</div></div>
+  <div class="stat"><div class="stat-value v-interview" id="s-interview">0</div><div class="stat-label">Interviews</div></div>
+  <div class="stat"><div class="stat-value v-rejected" id="s-rejected">0</div><div class="stat-label">Rejected</div></div>
+</div>
 
-  <!-- AI Add panel -->
-  <div class="add-panel">
-    <div class="panel-head"><div class="dot"></div> Add job via AI — paste a description</div>
-    <textarea id="jdInput" placeholder="Paste the full job description here. Claude will extract and intelligently fill in all fields — even completing vague or incomplete details…"></textarea>
-
-    <div id="statusMsg" style="display:none;" class="status-msg">
-      <div class="spinner"></div><span id="statusText">Extracting…</span>
-    </div>
-
-    <div id="previewArea" style="display:none;"></div>
-
+<div class="page" style="margin-top:1.5rem;">
+  <div class="card add-section">
+    <div class="card-title">Add new application</div>
+    <textarea id="jdInput" placeholder="Paste the job description here — Claude will extract the title, company, and a summary automatically."></textarea>
+    <div class="loading" id="loadingMsg"><div class="spinner"></div>Extracting details with Claude...</div>
+    <div id="previewArea"></div>
     <div class="btn-row">
-      <button class="btn-primary" id="extractBtn" onclick="extractJob()">✦ Extract &amp; preview</button>
-      <button class="btn-secondary" onclick="clearInput()">Clear</button>
+      <button class="btn btn-primary" id="extractBtn" onclick="extractJob()">✦ Extract &amp; preview</button>
+      <button class="btn" onclick="clearInput()">Clear</button>
     </div>
   </div>
 
-  <!-- Filter -->
-  <div class="filter-row">
-    <label>Status:</label>
-    <select id="filterStatus" onchange="renderTable()">
-      <option value="">All</option>
-      <option value="Applied">Applied</option>
-      <option value="Interview">Interview</option>
-      <option value="Offer">Offer</option>
-      <option value="Rejected">Rejected</option>
-    </select>
-    <label style="margin-left:8px;">Sort:</label>
-    <select id="sortOrder" onchange="renderTable()">
-      <option value="desc">Newest first</option>
-      <option value="asc">Oldest first</option>
-    </select>
+  <div class="card">
+    <div class="table-controls">
+      <input type="search" id="searchInput" placeholder="Search jobs..." oninput="renderTable()">
+      <label>Status:</label>
+      <select id="filterStatus" onchange="renderTable()">
+        <option value="">All</option>
+        <option value="Applied">Applied</option>
+        <option value="Interview">Interview</option>
+        <option value="Offer">Offer</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Job title</th><th>Company</th><th>Date applied</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty" id="emptyMsg" style="display:none;">No applications found.</div>
+    </div>
   </div>
+</div>
 
-  <!-- Table -->
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Job title</th>
-          <th>Company</th>
-          <th>Date applied</th>
-          <th>Follow-up</th>
-          <th>Status</th>
-          <th>Notes</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <div id="emptyMsg" class="empty" style="display:none;">
-      No applications yet — paste a job description above to get started.
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h2>Google Sheets connection</h2>
+    <p>Paste your Google Apps Script Web App URL. The tracker reads and writes all data directly to your spreadsheet.</p>
+    <label for="scriptUrl">Web App URL</label>
+    <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save &amp; connect</button>
     </div>
   </div>
 </div>
@@ -530,268 +155,158 @@ td.notes { color: var(--muted); font-size: 12px; max-width: 180px; }
 <div id="toast"></div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────
-const ANTHROPIC_KEY = "YOUR_ANTHROPIC_KEY_HERE"; // replace or prompt user
-let SCRIPT_URL = localStorage.getItem("scriptUrl") || "";
-let apps = [];
-let pendingEntry = null;
+const SCRIPT_URL_KEY = 'jt_script_url';
+let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_KEY) || '';
+function openConfig() { document.getElementById('scriptUrl').value = SCRIPT_URL; document.getElementById('configModal').classList.add('open'); }
+function closeConfig() { document.getElementById('configModal').classList.remove('open'); }
+function saveConfig() { SCRIPT_URL = document.getElementById('scriptUrl').value.trim(); localStorage.setItem(SCRIPT_URL_KEY, SCRIPT_URL); closeConfig(); if (SCRIPT_URL) loadFromSheets(); }
+function setSyncStatus(state, label) { document.getElementById('syncDot').className = 'sync-dot ' + state; document.getElementById('syncLabel').textContent = label; }
 
-// ── Init ─────────────────────────────────────────────────────
-window.addEventListener("DOMContentLoaded", () => {
-  if (SCRIPT_URL) {
-    document.getElementById("configBanner").style.display = "none";
-    document.getElementById("scriptUrlInput").value = SCRIPT_URL;
-  }
-  loadFromSheets();
-});
+let apps = [], nextId = 1, pendingEntry = null;
 
-function saveScriptUrl() {
-  const val = document.getElementById("scriptUrlInput").value.trim();
-  if (!val.startsWith("https://")) { showToast("Please enter a valid URL.", "error"); return; }
-  SCRIPT_URL = val;
-  localStorage.setItem("scriptUrl", SCRIPT_URL);
-  document.getElementById("configBanner").style.display = "none";
-  showToast("URL saved! Loading data…", "success");
-  loadFromSheets();
-}
-
-// ── Google Sheets API calls ───────────────────────────────────
-async function sheetsCall(body) {
-  if (!SCRIPT_URL) { showToast("Set your Apps Script URL first.", "error"); return null; }
-  try {
-    const r = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: { "Content-Type": "text/plain" }
-    });
-    return await r.json();
-  } catch (e) {
-    showToast("Connection error: " + e.message, "error");
-    return null;
-  }
-}
+const SEED = [
+  {id:1,title:'Research Associate - Digital Skills and STEM Education',company:'National College of Ireland',date:'2026-03-08',status:'Rejected',notes:''},
+  {id:2,title:'Library Assistant',company:'Dublin College University',date:'2026-03-10',status:'Rejected',notes:''},
+  {id:3,title:'Junior Consultant',company:'Archer',date:'2026-03-10',status:'Rejected',notes:''},
+  {id:4,title:'Junior Consultant',company:'Access Healthcare',date:'2026-03-10',status:'Rejected',notes:''},
+  {id:5,title:'Entry Level - Technology (Cloud Engineering)',company:'Carne Group',date:'2026-03-10',status:'Rejected',notes:''},
+  {id:6,title:'IT Helpdesk Support Analyst - Level 1',company:'Mason Hayes & Curran',date:'2026-03-10',status:'Rejected',notes:''},
+  {id:7,title:'Ireland Technology Discover Graduate Programme 2026',company:'Vodafone',date:'2026-03-18',status:'Rejected',notes:''},
+  {id:8,title:'Early Career Analyst IT',company:'AIG',date:'2026-03-18',status:'Rejected',notes:'Need to check the website regularly'},
+  {id:9,title:'Graduate - Operations Technology Analyst',company:'Susquehanna International Group',date:'2026-03-18',status:'Rejected',notes:''},
+  {id:10,title:'Data Center Career Returners Program',company:'AWS',date:'2026-03-18',status:'Rejected',notes:'Need to check the website regularly'},
+  {id:11,title:'Graduate Software Engineer',company:'',date:'2026-03-18',status:'Rejected',notes:''},
+  {id:12,title:'EIR Web Developer / Programmer (EBT7922)',company:'EIR',date:'2026-03-21',status:'Rejected',notes:''},
+  {id:13,title:'Graduate Program - Digital Strategy',company:'Hewlett Packard Enterprise',date:'2026-03-21',status:'Rejected',notes:''},
+  {id:14,title:'Software Engineer Graduate',company:'Arista',date:'2026-03-21',status:'Rejected',notes:''},
+  {id:15,title:'Forward Deployed Engineer \u2013 New Graduate',company:'Whippy',date:'2026-03-21',status:'Rejected',notes:''},
+  {id:16,title:'Genesys Cloud Engineer',company:'Ardowen',date:'2026-03-31',status:'Rejected',notes:''},
+  {id:17,title:'Site Reliability Engineer',company:'Susquehanna International Group',date:'2026-03-31',status:'Rejected',notes:''},
+  {id:18,title:'Cloud Operations Engineer',company:'MongoDB',date:'2026-03-31',status:'Rejected',notes:''},
+  {id:19,title:'Entry Level - Site Reliability Engineer',company:'Yelp',date:'2026-04-04',status:'Rejected',notes:''},
+  {id:20,title:'Graduate Software Engineer, Open Source and Linux, Canonical Ubuntu',company:'Canonical',date:'2026-04-04',status:'Rejected',notes:''},
+  {id:21,title:'UCD Library Assistant',company:'University College Dublin',date:'2026-04-05',status:'Rejected',notes:''},
+  {id:22,title:'UCD Research Assistant',company:'University College Dublin',date:'2026-04-06',status:'Rejected',notes:''},
+];
 
 async function loadFromSheets() {
-  setStatus("Loading from Google Sheets…");
-  const res = await sheetsCall({ action: "getAll" });
-  if (!res) { clearStatus(); return; }
-  apps = res.rows || [];
-  clearStatus();
-  renderStats();
-  renderTable();
-  const now = new Date();
-  document.getElementById("lastUpdated").textContent =
-    "synced " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-// ── Stats ─────────────────────────────────────────────────────
-function renderStats() {
-  document.getElementById("s-total").textContent    = apps.length;
-  document.getElementById("s-applied").textContent  = apps.filter(a => a.status === "Applied").length;
-  document.getElementById("s-interview").textContent= apps.filter(a => a.status === "Interview").length;
-  document.getElementById("s-rejected").textContent = apps.filter(a => a.status === "Rejected").length;
-}
-
-// ── Table ─────────────────────────────────────────────────────
-function renderTable() {
-  const filter = document.getElementById("filterStatus").value;
-  const sort   = document.getElementById("sortOrder").value;
-  let list = filter ? apps.filter(a => a.status === filter) : [...apps];
-  list.sort((a, b) => sort === "asc"
-    ? a.date.localeCompare(b.date)
-    : b.date.localeCompare(a.date));
-
-  const tbody = document.getElementById("tableBody");
-  const empty = document.getElementById("emptyMsg");
-  if (list.length === 0) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
-  empty.style.display = "none";
-
-  const statuses = ["Applied", "Interview", "Offer", "Rejected"];
-  tbody.innerHTML = list.map((a, i) => `
-    <tr>
-      <td class="num">${i + 1}</td>
-      <td class="title">${esc(a.title)}</td>
-      <td class="company">${esc(a.company)}</td>
-      <td class="date">${a.date}</td>
-      <td class="followup">${a.followUp || "—"}</td>
-      <td>
-        <select class="status-select status-${a.status}" data-idx="${a.rowIndex}"
-          onchange="updateStatus(this, ${a.rowIndex})">
-          ${statuses.map(s => `<option${s===a.status?" selected":""}>${s}</option>`).join("")}
-        </select>
-      </td>
-      <td class="notes">${esc(a.notes) || "—"}</td>
-      <td>
-        <button class="action-btn del" title="Delete" onclick="deleteRow(${a.rowIndex})">✕</button>
-      </td>
-    </tr>
-  `).join("");
-}
-
-async function updateStatus(sel, rowIndex) {
-  const status = sel.value;
-  sel.className = `status-select status-${status}`;
-  const app = apps.find(a => a.rowIndex === rowIndex);
-  if (app) app.status = status;
-  renderStats();
-  await sheetsCall({ action: "updateStatus", rowIndex, status });
-  showToast("Status updated.", "success");
-}
-
-async function deleteRow(rowIndex) {
-  if (!confirm("Remove this application?")) return;
-  apps = apps.filter(a => a.rowIndex !== rowIndex);
-  // recalculate rowIndex offsets after deletion
-  apps.forEach((a, i) => { if (a.rowIndex > rowIndex) a.rowIndex--; });
-  renderStats();
-  renderTable();
-  await sheetsCall({ action: "deleteRow", rowIndex });
-  showToast("Removed.", "success");
-}
-
-// ── AI Extraction ─────────────────────────────────────────────
-async function extractJob() {
-  const jd = document.getElementById("jdInput").value.trim();
-  if (!jd) { showToast("Paste a job description first.", "error"); return; }
-
-  document.getElementById("extractBtn").disabled = true;
-  document.getElementById("previewArea").style.display = "none";
-  setStatus("Reading job description…");
-
-  const prompt = `You are helping track job applications. Given the job description below, extract and intelligently fill in the following fields. If any detail is missing or vague, use your judgement to write a concise, professional value that fits the role — do not leave fields empty.
-
-Fields to fill:
-- title: The exact job title. If not clear, infer from context.
-- company: Company name. If not mentioned, write "Not specified".
-- notes: A single sentence (max 15 words) summarising what the role involves. Be specific and use action verbs.
-- followUp: Leave as empty string "".
-
-Return ONLY a raw JSON object. No markdown, no explanation.
-
-Job description:
-${jd.substring(0, 4000)}`;
-
+  if (!SCRIPT_URL) { apps = JSON.parse(JSON.stringify(SEED)); nextId = 23; renderAll(); return; }
+  setSyncStatus('syncing', 'Loading...');
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 400,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-    const data = await resp.json();
-    const raw = data.content?.find(b => b.type === "text")?.text || "{}";
-    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-    pendingEntry = {
-      title:    parsed.title    || "Unknown role",
-      company:  parsed.company  || "Unknown company",
-      notes:    parsed.notes    || "",
-      followUp: parsed.followUp || "",
-      date:     new Date().toISOString().split("T")[0],
-      status:   "Applied"
-    };
-    showPreview(pendingEntry);
-  } catch (e) {
-    showToast("Extraction failed — check your API key or try again.", "error");
-  }
-
-  clearStatus();
-  document.getElementById("extractBtn").disabled = false;
+    const res = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await res.json();
+    if (data.rows && data.rows.length > 0) {
+      apps = data.rows.map((r, i) => ({ id: i+1, title: r[0]||'', company: r[1]||'', date: r[2]||'', status: r[3]||'Applied', notes: r[4]||'' }));
+      nextId = apps.length + 1;
+    } else {
+      apps = JSON.parse(JSON.stringify(SEED)); nextId = 23;
+      for (const a of SEED) await sheetPost('append', {title:a.title,company:a.company,date:a.date,status:a.status,notes:a.notes});
+    }
+    setSyncStatus('synced', 'Synced');
+  } catch(e) { setSyncStatus('error', 'Connection error'); showToast('Could not connect. Showing local data.'); apps = JSON.parse(JSON.stringify(SEED)); nextId = 23; }
+  renderAll();
 }
 
-function showPreview(entry) {
-  const statuses = ["Applied", "Interview", "Offer", "Rejected"];
-  document.getElementById("previewArea").innerHTML = `
-    <div class="preview-card">
-      <div class="prow"><span class="plabel">Job title</span>
-        <span class="pval"><input id="p-title" value="${esc(entry.title)}"></span></div>
-      <div class="prow"><span class="plabel">Company</span>
-        <span class="pval"><input id="p-company" value="${esc(entry.company)}"></span></div>
-      <div class="prow"><span class="plabel">Date applied</span>
-        <span class="pval"><input id="p-date" type="date" value="${entry.date}"></span></div>
-      <div class="prow"><span class="plabel">Follow-up</span>
-        <span class="pval"><input id="p-followup" type="date" value="${entry.followUp}"></span></div>
-      <div class="prow"><span class="plabel">Status</span>
-        <span class="pval"><select id="p-status">
-          ${statuses.map(s=>`<option${s===entry.status?" selected":""}>${s}</option>`).join("")}
-        </select></span></div>
-      <div class="prow"><span class="plabel">Notes</span>
-        <span class="pval"><textarea id="p-notes" rows="2">${esc(entry.notes)}</textarea></span></div>
-    </div>
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn-primary" onclick="confirmAdd()">✓ Add to tracker</button>
-      <button class="btn-secondary" onclick="cancelPreview()">Cancel</button>
-    </div>
-  `;
-  document.getElementById("previewArea").style.display = "block";
+async function sheetPost(action, body) {
+  if (!SCRIPT_URL) return;
+  try { await fetch(SCRIPT_URL + '?action=' + action, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }); } catch(e) {}
+}
+
+function renderAll() { renderStats(); renderTable(); }
+function renderStats() {
+  document.getElementById('s-total').textContent     = apps.length;
+  document.getElementById('s-applied').textContent   = apps.filter(a=>a.status==='Applied').length;
+  document.getElementById('s-interview').textContent = apps.filter(a=>a.status==='Interview').length;
+  document.getElementById('s-rejected').textContent  = apps.filter(a=>a.status==='Rejected').length;
+}
+function sc(s) { return {Applied:'status-applied',Interview:'status-interview',Offer:'status-offer',Rejected:'status-rejected'}[s]||'status-pending'; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderTable() {
+  const filter = document.getElementById('filterStatus').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = apps.filter(a => (!filter||a.status===filter) && (!search||a.title.toLowerCase().includes(search)||a.company.toLowerCase().includes(search)));
+  const tbody = document.getElementById('tableBody'), empty = document.getElementById('emptyMsg');
+  if (!filtered.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = filtered.map((a,i) => `<tr>
+    <td style="color:#BBB;font-size:12px;">${i+1}</td>
+    <td class="job-title">${esc(a.title)}</td>
+    <td class="company">${esc(a.company)}</td>
+    <td class="date">${a.date}</td>
+    <td><select class="status-select ${sc(a.status)}" onchange="updateStatus(${a.id},this.value,this)">
+      ${['Applied','Interview','Offer','Rejected'].map(s=>`<option${a.status===s?' selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td class="notes-cell">${esc(a.notes)||'—'}</td>
+    <td><button class="btn-del" onclick="deleteApp(${a.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+async function updateStatus(id, status, sel) {
+  const a = apps.find(x=>x.id===id); if(!a) return;
+  a.status = status; sel.className = 'status-select ' + sc(status); renderStats();
+  setSyncStatus('syncing','Saving...');
+  await sheetPost('updateStatus', {title:a.title,company:a.company,date:a.date,status});
+  setSyncStatus('synced','Synced');
+}
+
+async function deleteApp(id) {
+  const a = apps.find(x=>x.id===id); if(!a||!confirm('Remove "'+a.title+'"?')) return;
+  apps = apps.filter(x=>x.id!==id); renderAll();
+  await sheetPost('delete',{title:a.title,company:a.company,date:a.date});
+  showToast('Removed');
+}
+
+async function extractJob() {
+  const jd = document.getElementById('jdInput').value.trim(); if(!jd){showToast('Paste a job description first');return;}
+  document.getElementById('extractBtn').disabled=true; document.getElementById('loadingMsg').style.display='flex'; document.getElementById('previewArea').innerHTML='';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:'Extract from this job description and return ONLY a raw JSON object, no markdown: {"title":"job title","company":"company name","notes":"one-line summary max 12 words"}.\n\n'+jd.substring(0,3000)}]})});
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'{}';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    pendingEntry = {title:parsed.title||'Unknown role',company:parsed.company||'',notes:parsed.notes||''};
+    showPreview(pendingEntry);
+  } catch(e) { document.getElementById('previewArea').innerHTML='<p style="color:#DC2626;font-size:13px;margin-top:10px;">Could not extract details — check your network and try again.</p>'; }
+  document.getElementById('loadingMsg').style.display='none'; document.getElementById('extractBtn').disabled=false;
+}
+
+function showPreview(e) {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('previewArea').innerHTML=`<div class="preview"><div class="preview-grid">
+    <span class="preview-label">Job title</span><span class="preview-val">${esc(e.title)}</span>
+    <span class="preview-label">Company</span><span class="preview-val">${esc(e.company)||'<span style="color:#AAA">Not found</span>'}</span>
+    <span class="preview-label">Date</span><span class="preview-val">${today}</span>
+    <span class="preview-label">Notes</span><span class="preview-val">${esc(e.notes)||'—'}</span>
+  </div><div class="preview-actions">
+    <button class="btn btn-primary" onclick="confirmAdd()">✓ Add to tracker</button>
+    <button class="btn" onclick="cancelPreview()">Cancel</button>
+  </div></div>`;
 }
 
 async function confirmAdd() {
-  const row = {
-    title:    document.getElementById("p-title").value.trim(),
-    company:  document.getElementById("p-company").value.trim(),
-    date:     document.getElementById("p-date").value,
-    followUp: document.getElementById("p-followup").value,
-    status:   document.getElementById("p-status").value,
-    notes:    document.getElementById("p-notes").value.trim()
-  };
-  setStatus("Saving to Google Sheets…");
-  const res = await sheetsCall({ action: "addRow", row });
-  clearStatus();
-  if (!res || res.error) { showToast("Save failed. Check your Apps Script URL.", "error"); return; }
-  showToast("Added to tracker!", "success");
-  clearInput();
-  await loadFromSheets();
+  if(!pendingEntry) return;
+  const today = new Date().toISOString().split('T')[0];
+  const entry = {id:nextId++,...pendingEntry,date:today,status:'Applied'};
+  apps.unshift(entry); renderAll(); clearInput(); showToast('Added — '+entry.title);
+  setSyncStatus('syncing','Saving...');
+  await sheetPost('append',{title:entry.title,company:entry.company,date:entry.date,status:entry.status,notes:entry.notes});
+  setSyncStatus('synced','Synced');
 }
 
-function cancelPreview() {
-  pendingEntry = null;
-  document.getElementById("previewArea").style.display = "none";
-}
+function cancelPreview() { pendingEntry=null; document.getElementById('previewArea').innerHTML=''; }
+function clearInput() { document.getElementById('jdInput').value=''; document.getElementById('previewArea').innerHTML=''; pendingEntry=null; }
 
-function clearInput() {
-  document.getElementById("jdInput").value = "";
-  document.getElementById("previewArea").style.display = "none";
-  pendingEntry = null;
-}
-
-// ── Export ────────────────────────────────────────────────────
 function exportCSV() {
-  const headers = ["Job Title","Company","Date Applied","Status","Follow-up Date","Notes"];
-  const rows = apps.map(a =>
-    [a.title,a.company,a.date,a.status,a.followUp,a.notes]
-      .map(v => `"${(v||"").replace(/"/g,'""')}"`)
-      .join(",")
-  );
-  const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "job_applications.csv"; a.click();
-}
-
-// ── Helpers ───────────────────────────────────────────────────
-function esc(str) {
-  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const rows=[['Job Title','Company','Date Applied','Status','Notes'],...apps.map(a=>[a.title,a.company,a.date,a.status,a.notes])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='job_applications.csv'; a.click();
 }
 
 let toastTimer;
-function showToast(msg, type = "") {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "show " + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = ""; }, 3000);
-}
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800); }
 
-function setStatus(msg) {
-  document.getElementById("statusMsg").style.display = "flex";
-  document.getElementById("statusText").textContent = msg;
-}
-function clearStatus() {
-  document.getElementById("statusMsg").style.display = "none";
-}
+if (SCRIPT_URL) { setSyncStatus('syncing','Connecting...'); loadFromSheets(); } else { apps=JSON.parse(JSON.stringify(SEED)); nextId=23; setSyncStatus('','Not configured'); renderAll(); }
 </script>
 </body>
 </html>
