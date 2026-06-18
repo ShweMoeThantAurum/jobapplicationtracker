@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Application Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f1117;
+  --surface:   #181c26;
+  --surface2:  #1e2333;
+  --border:    #2a3048;
+  --border2:   #3a4560;
+  --text:      #e8eaf2;
+  --muted:     #7a82a0;
+  --accent:    #4f7cff;
+  --accent-dim:#1e2d5c;
+  --green:     #22c55e;
+  --green-dim: #0f2d1c;
+  --amber:     #f59e0b;
+  --amber-dim: #2d1f06;
+  --red:       #ef4444;
+  --red-dim:   #2d0f0f;
+  --teal:      #2dd4bf;
+  --teal-dim:  #0a2523;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Layout ── */
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Config banner ── */
+.config-banner {
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 13px;
+  color: var(--amber);
+}
+.config-banner input {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--amber);
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.config-banner input::placeholder { color: rgba(245,158,11,0.5); }
+.config-banner input:focus { outline: none; border-color: #fbbf24; }
+.config-banner button {
+  background: var(--amber);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.header-left h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.header-left p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Stats ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+.stat-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.stat-num {
+  font-size: 28px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text);
+}
+.stat-num.c-blue  { color: var(--accent); }
+.stat-num.c-green { color: var(--green); }
+.stat-num.c-red   { color: var(--red); }
+
+/* ── AI Add panel ── */
+.add-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--mono);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+
+.btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-secondary:hover { border-color: var(--border2); color: var(--text); }
+
+/* ── Status message ── */
+.status-msg {
+  font-size: 12px;
+  font-family: var(--mono);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Preview card ── */
+.preview-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.125rem;
+  margin-top: 12px;
+}
+.preview-card .prow {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  align-items: start;
+}
+.preview-card .prow:last-child { margin-bottom: 0; }
+.prow .plabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  padding-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.prow .pval {
+  color: var(--text);
+  font-weight: 500;
+}
+.prow .pval input,
+.prow .pval textarea,
+.prow .pval select {
+  width: 100%;
+  min-height: unset;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 5px 10px;
+  resize: none;
+}
+.prow .pval input:focus,
+.prow .pval textarea:focus,
+.prow .pval select:focus { outline: none; border-color: var(--accent); }
+.prow .pval select option { background: var(--surface2); }
+
+/* ── Filter row ── */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.filter-row label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.filter-row select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--sans);
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.filter-row select:focus { outline: none; border-color: var(--accent); }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+td {
+  padding: 10px 12px;
+  color: var(--text);
+  vertical-align: middle;
+}
+td.num { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+td.title { font-weight: 500; }
+td.company { color: var(--muted); }
+td.date { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+td.followup { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+td.notes { color: var(--muted); font-size: 12px; max-width: 180px; }
+
+/* ── Status badge ── */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.badge-Applied   { background: var(--accent-dim);  color: #7da4ff; }
+.badge-Interview { background: var(--green-dim);   color: #4ade80; }
+.badge-Offer     { background: var(--teal-dim);    color: var(--teal); }
+.badge-Rejected  { background: var(--red-dim);     color: #f87171; }
+.badge-Pending   { background: var(--surface2);    color: var(--muted); }
+
+/* inline status select */
+.status-select {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: 100px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.status-select:focus { outline: 1px solid var(--accent); }
+.status-Applied   { background: var(--accent-dim); color: #7da4ff; }
+.status-Interview { background: var(--green-dim);  color: #4ade80; }
+.status-Offer     { background: var(--teal-dim);   color: var(--teal); }
+.status-Rejected  { background: var(--red-dim);    color: #f87171; }
+.status-Pending   { background: var(--surface2);   color: var(--muted); }
+
+/* action btns */
+.action-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 0.1s, background 0.1s;
+}
+.action-btn:hover { background: var(--surface2); color: var(--text); }
+.action-btn.del:hover { color: var(--red); }
+
+/* empty state */
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+/* toast */
+#toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 999;
+  max-width: 320px;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { border-color: var(--green); color: var(--green); }
+#toast.error   { border-color: var(--red);   color: var(--red);   }
+
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Config banner (hidden once URL is saved) -->
+  <div class="config-banner" id="configBanner">
+    <span>⚙</span>
+    <span style="white-space:nowrap;">Apps Script URL:</span>
+    <input type="text" id="scriptUrlInput" placeholder="Paste your deployed Apps Script web app URL here…">
+    <button onclick="saveScriptUrl()">Save</button>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Job application tracker</h1>
+      <p id="lastUpdated">loading…</p>
+    </div>
+    <button class="btn-ghost" onclick="exportCSV()">↓ Export CSV</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-num" id="s-total">—</div></div>
+    <div class="stat"><div class="stat-label">Applied</div><div class="stat-num c-blue" id="s-applied">—</div></div>
+    <div class="stat"><div class="stat-label">Interviews</div><div class="stat-num c-green" id="s-interview">—</div></div>
+    <div class="stat"><div class="stat-label">Rejected</div><div class="stat-num c-red" id="s-rejected">—</div></div>
+  </div>
+
+  <!-- AI Add panel -->
+  <div class="add-panel">
+    <div class="panel-head"><div class="dot"></div> Add job via AI — paste a description</div>
+    <textarea id="jdInput" placeholder="Paste the full job description here. Claude will extract and intelligently fill in all fields — even completing vague or incomplete details…"></textarea>
+
+    <div id="statusMsg" style="display:none;" class="status-msg">
+      <div class="spinner"></div><span id="statusText">Extracting…</span>
+    </div>
+
+    <div id="previewArea" style="display:none;"></div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="extractBtn" onclick="extractJob()">✦ Extract &amp; preview</button>
+      <button class="btn-secondary" onclick="clearInput()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-row">
+    <label>Status:</label>
+    <select id="filterStatus" onchange="renderTable()">
+      <option value="">All</option>
+      <option value="Applied">Applied</option>
+      <option value="Interview">Interview</option>
+      <option value="Offer">Offer</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+    <label style="margin-left:8px;">Sort:</label>
+    <select id="sortOrder" onchange="renderTable()">
+      <option value="desc">Newest first</option>
+      <option value="asc">Oldest first</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Job title</th>
+          <th>Company</th>
+          <th>Date applied</th>
+          <th>Follow-up</th>
+          <th>Status</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="emptyMsg" class="empty" style="display:none;">
+      No applications yet — paste a job description above to get started.
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+const ANTHROPIC_KEY = "YOUR_ANTHROPIC_KEY_HERE"; // replace or prompt user
+let SCRIPT_URL = localStorage.getItem("scriptUrl") || "";
+let apps = [];
+let pendingEntry = null;
+
+// ── Init ─────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  if (SCRIPT_URL) {
+    document.getElementById("configBanner").style.display = "none";
+    document.getElementById("scriptUrlInput").value = SCRIPT_URL;
+  }
+  loadFromSheets();
+});
+
+function saveScriptUrl() {
+  const val = document.getElementById("scriptUrlInput").value.trim();
+  if (!val.startsWith("https://")) { showToast("Please enter a valid URL.", "error"); return; }
+  SCRIPT_URL = val;
+  localStorage.setItem("scriptUrl", SCRIPT_URL);
+  document.getElementById("configBanner").style.display = "none";
+  showToast("URL saved! Loading data…", "success");
+  loadFromSheets();
+}
+
+// ── Google Sheets API calls ───────────────────────────────────
+async function sheetsCall(body) {
+  if (!SCRIPT_URL) { showToast("Set your Apps Script URL first.", "error"); return null; }
+  try {
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "text/plain" }
+    });
+    return await r.json();
+  } catch (e) {
+    showToast("Connection error: " + e.message, "error");
+    return null;
+  }
+}
+
+async function loadFromSheets() {
+  setStatus("Loading from Google Sheets…");
+  const res = await sheetsCall({ action: "getAll" });
+  if (!res) { clearStatus(); return; }
+  apps = res.rows || [];
+  clearStatus();
+  renderStats();
+  renderTable();
+  const now = new Date();
+  document.getElementById("lastUpdated").textContent =
+    "synced " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function renderStats() {
+  document.getElementById("s-total").textContent    = apps.length;
+  document.getElementById("s-applied").textContent  = apps.filter(a => a.status === "Applied").length;
+  document.getElementById("s-interview").textContent= apps.filter(a => a.status === "Interview").length;
+  document.getElementById("s-rejected").textContent = apps.filter(a => a.status === "Rejected").length;
+}
+
+// ── Table ─────────────────────────────────────────────────────
+function renderTable() {
+  const filter = document.getElementById("filterStatus").value;
+  const sort   = document.getElementById("sortOrder").value;
+  let list = filter ? apps.filter(a => a.status === filter) : [...apps];
+  list.sort((a, b) => sort === "asc"
+    ? a.date.localeCompare(b.date)
+    : b.date.localeCompare(a.date));
+
+  const tbody = document.getElementById("tableBody");
+  const empty = document.getElementById("emptyMsg");
+  if (list.length === 0) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+
+  const statuses = ["Applied", "Interview", "Offer", "Rejected"];
+  tbody.innerHTML = list.map((a, i) => `
+    <tr>
+      <td class="num">${i + 1}</td>
+      <td class="title">${esc(a.title)}</td>
+      <td class="company">${esc(a.company)}</td>
+      <td class="date">${a.date}</td>
+      <td class="followup">${a.followUp || "—"}</td>
+      <td>
+        <select class="status-select status-${a.status}" data-idx="${a.rowIndex}"
+          onchange="updateStatus(this, ${a.rowIndex})">
+          ${statuses.map(s => `<option${s===a.status?" selected":""}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td class="notes">${esc(a.notes) || "—"}</td>
+      <td>
+        <button class="action-btn del" title="Delete" onclick="deleteRow(${a.rowIndex})">✕</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+async function updateStatus(sel, rowIndex) {
+  const status = sel.value;
+  sel.className = `status-select status-${status}`;
+  const app = apps.find(a => a.rowIndex === rowIndex);
+  if (app) app.status = status;
+  renderStats();
+  await sheetsCall({ action: "updateStatus", rowIndex, status });
+  showToast("Status updated.", "success");
+}
+
+async function deleteRow(rowIndex) {
+  if (!confirm("Remove this application?")) return;
+  apps = apps.filter(a => a.rowIndex !== rowIndex);
+  // recalculate rowIndex offsets after deletion
+  apps.forEach((a, i) => { if (a.rowIndex > rowIndex) a.rowIndex--; });
+  renderStats();
+  renderTable();
+  await sheetsCall({ action: "deleteRow", rowIndex });
+  showToast("Removed.", "success");
+}
+
+// ── AI Extraction ─────────────────────────────────────────────
+async function extractJob() {
+  const jd = document.getElementById("jdInput").value.trim();
+  if (!jd) { showToast("Paste a job description first.", "error"); return; }
+
+  document.getElementById("extractBtn").disabled = true;
+  document.getElementById("previewArea").style.display = "none";
+  setStatus("Reading job description…");
+
+  const prompt = `You are helping track job applications. Given the job description below, extract and intelligently fill in the following fields. If any detail is missing or vague, use your judgement to write a concise, professional value that fits the role — do not leave fields empty.
+
+Fields to fill:
+- title: The exact job title. If not clear, infer from context.
+- company: Company name. If not mentioned, write "Not specified".
+- notes: A single sentence (max 15 words) summarising what the role involves. Be specific and use action verbs.
+- followUp: Leave as empty string "".
+
+Return ONLY a raw JSON object. No markdown, no explanation.
+
+Job description:
+${jd.substring(0, 4000)}`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 400,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.find(b => b.type === "text")?.text || "{}";
+    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    pendingEntry = {
+      title:    parsed.title    || "Unknown role",
+      company:  parsed.company  || "Unknown company",
+      notes:    parsed.notes    || "",
+      followUp: parsed.followUp || "",
+      date:     new Date().toISOString().split("T")[0],
+      status:   "Applied"
+    };
+    showPreview(pendingEntry);
+  } catch (e) {
+    showToast("Extraction failed — check your API key or try again.", "error");
+  }
+
+  clearStatus();
+  document.getElementById("extractBtn").disabled = false;
+}
+
+function showPreview(entry) {
+  const statuses = ["Applied", "Interview", "Offer", "Rejected"];
+  document.getElementById("previewArea").innerHTML = `
+    <div class="preview-card">
+      <div class="prow"><span class="plabel">Job title</span>
+        <span class="pval"><input id="p-title" value="${esc(entry.title)}"></span></div>
+      <div class="prow"><span class="plabel">Company</span>
+        <span class="pval"><input id="p-company" value="${esc(entry.company)}"></span></div>
+      <div class="prow"><span class="plabel">Date applied</span>
+        <span class="pval"><input id="p-date" type="date" value="${entry.date}"></span></div>
+      <div class="prow"><span class="plabel">Follow-up</span>
+        <span class="pval"><input id="p-followup" type="date" value="${entry.followUp}"></span></div>
+      <div class="prow"><span class="plabel">Status</span>
+        <span class="pval"><select id="p-status">
+          ${statuses.map(s=>`<option${s===entry.status?" selected":""}>${s}</option>`).join("")}
+        </select></span></div>
+      <div class="prow"><span class="plabel">Notes</span>
+        <span class="pval"><textarea id="p-notes" rows="2">${esc(entry.notes)}</textarea></span></div>
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn-primary" onclick="confirmAdd()">✓ Add to tracker</button>
+      <button class="btn-secondary" onclick="cancelPreview()">Cancel</button>
+    </div>
+  `;
+  document.getElementById("previewArea").style.display = "block";
+}
+
+async function confirmAdd() {
+  const row = {
+    title:    document.getElementById("p-title").value.trim(),
+    company:  document.getElementById("p-company").value.trim(),
+    date:     document.getElementById("p-date").value,
+    followUp: document.getElementById("p-followup").value,
+    status:   document.getElementById("p-status").value,
+    notes:    document.getElementById("p-notes").value.trim()
+  };
+  setStatus("Saving to Google Sheets…");
+  const res = await sheetsCall({ action: "addRow", row });
+  clearStatus();
+  if (!res || res.error) { showToast("Save failed. Check your Apps Script URL.", "error"); return; }
+  showToast("Added to tracker!", "success");
+  clearInput();
+  await loadFromSheets();
+}
+
+function cancelPreview() {
+  pendingEntry = null;
+  document.getElementById("previewArea").style.display = "none";
+}
+
+function clearInput() {
+  document.getElementById("jdInput").value = "";
+  document.getElementById("previewArea").style.display = "none";
+  pendingEntry = null;
+}
+
+// ── Export ────────────────────────────────────────────────────
+function exportCSV() {
+  const headers = ["Job Title","Company","Date Applied","Status","Follow-up Date","Notes"];
+  const rows = apps.map(a =>
+    [a.title,a.company,a.date,a.status,a.followUp,a.notes]
+      .map(v => `"${(v||"").replace(/"/g,'""')}"`)
+      .join(",")
+  );
+  const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "job_applications.csv"; a.click();
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(str) {
+  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+let toastTimer;
+function showToast(msg, type = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ""; }, 3000);
+}
+
+function setStatus(msg) {
+  document.getElementById("statusMsg").style.display = "flex";
+  document.getElementById("statusText").textContent = msg;
+}
+function clearStatus() {
+  document.getElementById("statusMsg").style.display = "none";
+}
+</script>
+</body>
+</html>
