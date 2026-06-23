@@ -249,15 +249,16 @@ async function deleteApp(id) {
 
 async function extractJob() {
   const jd = document.getElementById('jdInput').value.trim(); if(!jd){showToast('Paste a job description first');return;}
+  if(!SCRIPT_URL){showToast('Connect Google Sheets first via Settings');return;}
   document.getElementById('extractBtn').disabled=true; document.getElementById('loadingMsg').style.display='flex'; document.getElementById('previewArea').innerHTML='';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:'Extract from this job description and return ONLY a raw JSON object, no markdown: {"title":"job title","company":"company name","notes":"one-line summary max 12 words"}.\n\n'+jd.substring(0,3000)}]})});
+    const res = await fetch(SCRIPT_URL + '?action=extract', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({jd: jd.substring(0,3000)})});
     const data = await res.json();
     const text = data.content?.find(b=>b.type==='text')?.text||'{}';
     const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
     pendingEntry = {title:parsed.title||'Unknown role',company:parsed.company||'',notes:parsed.notes||''};
     showPreview(pendingEntry);
-  } catch(e) { document.getElementById('previewArea').innerHTML='<p style="color:#DC2626;font-size:13px;margin-top:10px;">Could not extract details — check your network and try again.</p>'; }
+  } catch(e) { document.getElementById('previewArea').innerHTML='<p style="color:#DC2626;font-size:13px;margin-top:10px;">Could not extract details — check your Apps Script URL and try again.</p>'; }
   document.getElementById('loadingMsg').style.display='none'; document.getElementById('extractBtn').disabled=false;
 }
 
