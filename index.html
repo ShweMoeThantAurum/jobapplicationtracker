@@ -299,8 +299,9 @@ async function addManual() {
 }
 
 function clearForm() {
-  ['fTitle','fCompany','fDate','fNotes'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fCompany','fNotes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fStatus').value = 'Applied';
+  document.getElementById('fDate').value = todayStr();
 }
 
 function exportCSV() {
@@ -312,6 +313,7 @@ function exportCSV() {
 let toastTimer;
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800); }
 
+document.getElementById('fDate').value = todayStr();
 if (SCRIPT_URL) { setSyncStatus('syncing','Connecting...'); loadFromSheets(); } else { apps=[]; nextId=1; setSyncStatus('','Not configured'); renderAll(); }
 </script>
 </body>
