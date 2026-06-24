@@ -231,7 +231,10 @@ async function loadFromSheets() {
 
 async function sheetPost(action, body) {
   if (!SCRIPT_URL) return;
-  try { await fetch(SCRIPT_URL + '?action=' + action, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }); } catch(e) {}
+  try {
+    const params = new URLSearchParams({ action, ...body });
+    await fetch(SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
+  } catch(e) {}
 }
 
 function renderAll() { renderStats(); renderTable(); }
