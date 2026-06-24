@@ -82,7 +82,15 @@
   .modal input[type="text"] { width: 100%; font-family: inherit; font-size: 13px; padding: 9px 12px; border: 1px solid #E5E4E0; border-radius: 7px; background: #F7F6F3; color: #1A1A1A; margin-bottom: 1rem; }
   .modal input:focus { outline: none; border-color: #1A1A1A; background: #fff; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; }
-  @media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } .stat-value { font-size: 1.5rem; } }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group-full { grid-column: 1 / -1; }
+  .form-label { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+  .req { color: #DC2626; }
+  .add-section input[type="text"], .add-section select { width: 100%; font-family: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid #E5E4E0; border-radius: 8px; background: #F7F6F3; color: #1A1A1A; transition: border-color 0.15s; }
+  .add-section input[type="text"]:focus, .add-section select:focus { outline: none; border-color: #1A1A1A; background: #fff; }
+  .add-section input::placeholder { color: #AAA; }
+  @media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } .stat-value { font-size: 1.5rem; } .form-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -108,12 +116,36 @@
 <div class="page" style="margin-top:1.5rem;">
   <div class="card add-section">
     <div class="card-title">Add new application</div>
-    <textarea id="jdInput" placeholder="Paste the job description here — Claude will extract the title, company, and a summary automatically."></textarea>
-    <div class="loading" id="loadingMsg"><div class="spinner"></div>Extracting details with Claude...</div>
-    <div id="previewArea"></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Job title <span class="req">*</span></label>
+        <input type="text" id="fTitle" placeholder="e.g. Cloud Engineer" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Company <span class="req">*</span></label>
+        <input type="text" id="fCompany" placeholder="e.g. AWS" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date applied</label>
+        <input type="text" id="fDate" placeholder="DD/MM/YYYY" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="fStatus">
+          <option value="Applied">Applied</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="form-group form-group-full">
+        <label class="form-label">Notes</label>
+        <input type="text" id="fNotes" placeholder="Optional" autocomplete="off">
+      </div>
+    </div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="extractBtn" onclick="extractJob()">✦ Extract &amp; preview</button>
-      <button class="btn" onclick="clearInput()">Clear</button>
+      <button class="btn btn-primary" onclick="addManual()">+ Add application</button>
+      <button class="btn" onclick="clearForm()">Clear</button>
     </div>
   </div>
 
@@ -247,46 +279,29 @@ async function deleteApp(id) {
   showToast('Removed');
 }
 
-async function extractJob() {
-  const jd = document.getElementById('jdInput').value.trim(); if(!jd){showToast('Paste a job description first');return;}
-  if(!SCRIPT_URL){showToast('Connect Google Sheets first via Settings');return;}
-  document.getElementById('extractBtn').disabled=true; document.getElementById('loadingMsg').style.display='flex'; document.getElementById('previewArea').innerHTML='';
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=extract', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({jd: jd.substring(0,3000)})});
-    const data = await res.json();
-    const text = data.content?.find(b=>b.type==='text')?.text||'{}';
-    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-    pendingEntry = {title:parsed.title||'Unknown role',company:parsed.company||'',notes:parsed.notes||''};
-    showPreview(pendingEntry);
-  } catch(e) { document.getElementById('previewArea').innerHTML='<p style="color:#DC2626;font-size:13px;margin-top:10px;">Could not extract details — check your Apps Script URL and try again.</p>'; }
-  document.getElementById('loadingMsg').style.display='none'; document.getElementById('extractBtn').disabled=false;
+function todayStr() {
+  const now = new Date();
+  return String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
 }
 
-function showPreview(e) {
-  const now = new Date(); const today = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
-  document.getElementById('previewArea').innerHTML=`<div class="preview"><div class="preview-grid">
-    <span class="preview-label">Job title</span><span class="preview-val">${esc(e.title)}</span>
-    <span class="preview-label">Company</span><span class="preview-val">${esc(e.company)||'<span style="color:#AAA">Not found</span>'}</span>
-    <span class="preview-label">Date</span><span class="preview-val">${today}</span>
-    <span class="preview-label">Notes</span><span class="preview-val">${esc(e.notes)||'—'}</span>
-  </div><div class="preview-actions">
-    <button class="btn btn-primary" onclick="confirmAdd()">✓ Add to tracker</button>
-    <button class="btn" onclick="cancelPreview()">Cancel</button>
-  </div></div>`;
-}
-
-async function confirmAdd() {
-  if(!pendingEntry) return;
-  const now = new Date(); const today = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
-  const entry = {id:nextId++,...pendingEntry,date:today,status:'Applied'};
-  apps.unshift(entry); renderAll(); clearInput(); showToast('Added — '+entry.title);
+async function addManual() {
+  const title   = document.getElementById('fTitle').value.trim();
+  const company = document.getElementById('fCompany').value.trim();
+  const date    = document.getElementById('fDate').value.trim() || todayStr();
+  const status  = document.getElementById('fStatus').value;
+  const notes   = document.getElementById('fNotes').value.trim();
+  if (!title) { showToast('Job title is required'); return; }
+  const entry = { id: nextId++, title, company, date, status, notes };
+  apps.unshift(entry); renderAll(); clearForm(); showToast('Added — ' + title);
   setSyncStatus('syncing','Saving...');
-  await sheetPost('append',{title:entry.title,company:entry.company,date:entry.date,status:entry.status,notes:entry.notes});
+  await sheetPost('append', { title, company, date, status, notes });
   setSyncStatus('synced','Synced');
 }
 
-function cancelPreview() { pendingEntry=null; document.getElementById('previewArea').innerHTML=''; }
-function clearInput() { document.getElementById('jdInput').value=''; document.getElementById('previewArea').innerHTML=''; pendingEntry=null; }
+function clearForm() {
+  ['fTitle','fCompany','fDate','fNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fStatus').value = 'Applied';
+}
 
 function exportCSV() {
   const rows=[['Job Title','Company','Date Applied','Status','Notes'],...apps.map(a=>[a.title,a.company,a.date,a.status,a.notes])];
