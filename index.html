@@ -229,12 +229,12 @@ async function loadFromSheets() {
   renderAll();
 }
 
-async function sheetPost(action, body) {
+function sheetPost(action, body) {
   if (!SCRIPT_URL) return;
-  try {
-    const params = new URLSearchParams({ action, ...body });
-    await fetch(SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
-  } catch(e) {}
+  // Use image ping — bypasses CORS entirely, no preflight, works with Apps Script redirects
+  const params = new URLSearchParams({ action, ...body });
+  const img = new Image();
+  img.src = SCRIPT_URL + '?' + params.toString();
 }
 
 function renderAll() { renderStats(); renderTable(); }
@@ -270,15 +270,14 @@ function renderTable() {
 async function updateStatus(id, status, sel) {
   const a = apps.find(x=>x.id===id); if(!a) return;
   a.status = status; sel.className = 'status-select ' + sc(status); renderStats();
-  setSyncStatus('syncing','Saving...');
-  await sheetPost('updateStatus', {title:a.title,company:a.company,date:a.date,status});
+  sheetPost('updateStatus', {title:a.title,company:a.company,date:a.date,status});
   setSyncStatus('synced','Synced');
 }
 
 async function deleteApp(id) {
   const a = apps.find(x=>x.id===id); if(!a||!confirm('Remove "'+a.title+'"?')) return;
   apps = apps.filter(x=>x.id!==id); renderAll();
-  await sheetPost('delete',{title:a.title,company:a.company,date:a.date});
+  sheetPost('delete',{title:a.title,company:a.company,date:a.date});
   showToast('Removed');
 }
 
@@ -296,8 +295,7 @@ async function addManual() {
   if (!title) { showToast('Job title is required'); return; }
   const entry = { id: nextId++, title, company, date, status, notes };
   apps.unshift(entry); renderAll(); clearForm(); showToast('Added — ' + title);
-  setSyncStatus('syncing','Saving...');
-  await sheetPost('append', { title, company, date, status, notes });
+  sheetPost('append', { title, company, date, status, notes });
   setSyncStatus('synced','Synced');
 }
 
